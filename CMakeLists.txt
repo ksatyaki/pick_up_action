@@ -5,6 +5,7 @@ project(pick_up_action)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
+  acquire_objects
   actionlib
   actionlib_msgs
   doro_manipulation
@@ -90,7 +91,7 @@ generate_messages(
 catkin_package(
 INCLUDE_DIRS include
 #  LIBRARIES pick_up_action
-  CATKIN_DEPENDS actionlib actionlib_msgs doro_manipulation doro_msgs geometry_msgs move_base_msgs roscpp std_msgs tf message_runtime
+  CATKIN_DEPENDS acquire_objects actionlib actionlib_msgs doro_manipulation doro_msgs geometry_msgs move_base_msgs roscpp std_msgs tf message_runtime
 #  DEPENDS system_lib
 )
 
@@ -112,6 +113,7 @@ include_directories(
 
 ## Declare a cpp executable
 add_executable(pick_up_action_server src/pick_up_action_server.cpp)
+add_executable(pick_up_action_client src/pick_up_client_test.cpp)
 
 add_executable(lottery src/lottery.cc)
 
@@ -121,14 +123,15 @@ add_executable(lottery src/lottery.cc)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(pick_up_action_server
-  ${catkin_LIBRARIES}
-  doro_manipulation
-  grasp_pose_generator
+  ${catkin_LIBRARIES}  
+)
+
+target_link_libraries(pick_up_action_client
+    ${catkin_LIBRARIES}
 )
 
 target_link_libraries(lottery
     ${catkin_LIBRARIES}
-    doro_manipulation
 )
 
 #############

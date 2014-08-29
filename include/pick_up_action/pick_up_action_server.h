@@ -9,12 +9,14 @@
 
 #include <ros/ros.h>
 #include <actionlib/server/simple_action_server.h>
+#include <actionlib/client/simple_action_client.h>
 #include <pick_up_action/PickUpAction.h>
 
 #include <doro_msgs/GraspPoses.h>
 
-#include <doro_manipulation/grasp_pose_generator.h>
-#include <doro_manipulation/doro_manipulation.h>
+#include <acquire_objects/AcquireObjects.h>
+#include <doro_manipulation/GenerateGraspPoses.h>
+#include <doro_manipulation/PlanAndMoveArmAction.h>
 
 namespace pick_up_action
 {
@@ -25,6 +27,22 @@ namespace pick_up_action
 class PickUpActionServer
 {
 protected:
+
+	/**
+	 * A client to the "generate_grasp_poses" server.
+	 */
+	ros::ServiceClient gpg_client_;
+
+	/**
+	 * A client to the "acquire_objects" server.
+	 */
+	ros::ServiceClient ao_client_;
+
+	/**
+	 * A client to the "plan_and_move_arm" server.
+	 */
+	actionlib::SimpleActionClient <doro_manipulation::PlanAndMoveArmAction> pam_client_;
+
 	/**
 	 * A Nodehandle for this class.
 	 * Note: A nodehandle has to be created before an action server class is declared.
@@ -53,29 +71,6 @@ protected:
 	 * Note: We use the execute callback method.
 	 */
 	void processGoal(const pick_up_action::PickUpGoalConstPtr& goal);
-
-	/**
-	 * The function that preempts the current goal.
-	 * Note: This is not used currently.
-	 */
-	void preemptGoal();
-
-	/**
-	 * The Grasp Pose Generation Object.
-	 * This we create only after we accept the goal.
-	 */
-	doro_manipulation::GraspPoseGenerator *G_P_G;
-
-	/**
-	 * The DoroMoveit Object.
-	 * This is created and stays on all the time. Used only when a grasp pose is available.
-	 */
-	doro_manipulation::DoroManipulation *D_M_T;
-
-	/*
-	 * Thread for spinning from within the callback.
-	 */
-	//static void* spinThread(void* dummy);
 
 public:
 	/*

@@ -1,5 +1,5 @@
-std_msgs/String signature
+string signature
 ---
-std_msgs/String result
+string result
 ---
-std_msgs/String status
+string status
