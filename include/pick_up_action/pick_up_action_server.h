@@ -13,8 +13,6 @@
 #include <pick_up_action/PickUpAction.h>
 
 #include <doro_msgs/GraspPoses.h>
-
-#include <acquire_objects/AcquireObjects.h>
 #include <doro_manipulation/GenerateGraspPoses.h>
 #include <doro_manipulation/PlanAndMoveArmAction.h>
 
