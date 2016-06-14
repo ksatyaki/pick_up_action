@@ -14,7 +14,7 @@ PickUpActionServer::PickUpActionServer() :
 		server_ (nh_, "pick_up", boost::bind(&PickUpActionServer::processGoal, this, _1), false),
 		pam_client_ ("plan_and_move_arm", true)
 {
-	gpg_client_ = nh_.serviceClient <doro_manipulation::GenerateGraspPoses> ("generate_grasp_poses", false);
+	gpg_client_ = nh_.serviceClient <jaco_manipulation::GenerateGraspPoses> ("generate_grasp_poses", false);
 
 	server_.start();
 	ROS_INFO("Server Started!");
@@ -28,7 +28,7 @@ void PickUpActionServer::processGoal(const pick_up_action::PickUpGoalConstPtr& g
 {
 	ROS_INFO("Picking up object.");
 	
-	doro_manipulation::GenerateGraspPoses gpg_message;
+	jaco_manipulation::GenerateGraspPoses gpg_message;
 
 	gpg_message.request.object_location.point.x = goal->x;
 	gpg_message.request.object_location.point.y = goal->y;
@@ -43,7 +43,7 @@ void PickUpActionServer::processGoal(const pick_up_action::PickUpGoalConstPtr& g
 		ROS_INFO("Generated Grasp Poses... SUCCESS");
 		ROS_INFO("Proceeding to grasp object...");
 
-		doro_manipulation::PlanAndMoveArmGoal pam_goal;
+		jaco_manipulation::PlanAndMoveArmGoal pam_goal;
 		pam_goal.goal_type = "pose";
 
 		bool grasp_success = false;

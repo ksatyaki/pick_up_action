@@ -7,8 +7,7 @@ project(pick_up_action)
 find_package(catkin REQUIRED COMPONENTS
   actionlib
   actionlib_msgs
-  doro_manipulation
-  doro_msgs
+  jaco_manipulation
   geometry_msgs
   roscpp
   std_msgs
@@ -31,7 +30,7 @@ generate_messages(
 
 catkin_package(
   INCLUDE_DIRS include
-  CATKIN_DEPENDS actionlib actionlib_msgs doro_manipulation doro_msgs geometry_msgs roscpp std_msgs tf message_runtime
+  CATKIN_DEPENDS actionlib actionlib_msgs jaco_manipulation geometry_msgs roscpp std_msgs tf message_runtime
 )
 
 include_directories(include)

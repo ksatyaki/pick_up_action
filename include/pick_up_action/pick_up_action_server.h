@@ -12,9 +12,8 @@
 #include <actionlib/client/simple_action_client.h>
 #include <pick_up_action/PickUpAction.h>
 
-#include <doro_msgs/GraspPoses.h>
-#include <doro_manipulation/GenerateGraspPoses.h>
-#include <doro_manipulation/PlanAndMoveArmAction.h>
+#include <jaco_manipulation/GenerateGraspPoses.h>
+#include <jaco_manipulation/PlanAndMoveArmAction.h>
 
 namespace pick_up_action
 {
@@ -39,7 +38,7 @@ protected:
 	/**
 	 * A client to the "plan_and_move_arm" server.
 	 */
-	actionlib::SimpleActionClient <doro_manipulation::PlanAndMoveArmAction> pam_client_;
+	actionlib::SimpleActionClient <jaco_manipulation::PlanAndMoveArmAction> pam_client_;
 
 	/**
 	 * A Nodehandle for this class.
