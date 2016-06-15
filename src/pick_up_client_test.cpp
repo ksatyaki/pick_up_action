@@ -19,9 +19,10 @@ int main(int argn, char* args[])
 	ros::init(argn, args, "cliend");
 
 	pick_up_action::PickUpGoal _goal;
-	std::cin>>_goal.x;
-	std::cin>>_goal.y;
-	std::cin>>_goal.z;
+	_goal.object_location.header.frame_id = "base_link";
+	std::cin>>_goal.object_location.point.x;
+	std::cin>>_goal.object_location.point.y;
+	std::cin>>_goal.object_location.point.z;
 
 
 	actionlib::SimpleActionClient <pick_up_action::PickUpAction> _sac ("pick_up", true);

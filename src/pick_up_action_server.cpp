@@ -30,11 +30,8 @@ void PickUpActionServer::processGoal(const pick_up_action::PickUpGoalConstPtr& g
 	
 	jaco_manipulation::GenerateGraspPoses gpg_message;
 
-	gpg_message.request.object_location.point.x = goal->x;
-	gpg_message.request.object_location.point.y = goal->y;
-	gpg_message.request.object_location.point.z = goal->z;
-	// Crappy. Because we should not be dealing frames ourselves.
-	gpg_message.request.object_location.header.frame_id = "root";
+	gpg_message.request.object_location = goal->object_location;
+
 	gpg_message.request.object_location.header.stamp = ros::Time::now();
 
 	if(gpg_client_.call(gpg_message))
@@ -51,6 +48,7 @@ void PickUpActionServer::processGoal(const pick_up_action::PickUpGoalConstPtr& g
 		for(int round = 0; round < gpg_message.response.grasp_poses.size(); round++)
 		{
 			pam_goal.target_pose = gpg_message.response.pregrasp_poses[round];
+			ROS_INFO("TARGET POSE IN %s FRAME...", pam_goal.target_pose.header.frame_id.c_str());
 			pam_client_.waitForServer();
 			ROS_INFO("Moving to pre-grasp pose...");
 			pam_client_.sendGoal(pam_goal);
@@ -106,6 +104,8 @@ void PickUpActionServer::processGoal(const pick_up_action::PickUpGoalConstPtr& g
 		ROS_INFO("\'Smooth as a whistle and it don't cost much\'.");
 		ROS_INFO("The object is in safe hands! :-)");
 		ROS_INFO("DONE.");
+		server_.setSucceeded();
+
 	}
 	else
 	{
