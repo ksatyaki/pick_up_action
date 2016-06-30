@@ -14,6 +14,7 @@
 
 #include <jaco_manipulation/GenerateGraspPoses.h>
 #include <jaco_manipulation/PlanAndMoveArmAction.h>
+#include <control_msgs/GripperCommandAction.h>
 
 namespace pick_up_action
 {
@@ -31,14 +32,10 @@ protected:
 	ros::ServiceClient gpg_client_;
 
 	/**
-	 * A client to the "acquire_objects" server.
-	 */
-	ros::ServiceClient ao_client_;
-
-	/**
 	 * A client to the "plan_and_move_arm" server.
 	 */
 	actionlib::SimpleActionClient <jaco_manipulation::PlanAndMoveArmAction> pam_client_;
+
 
 	/**
 	 * A Nodehandle for this class.
@@ -70,15 +67,15 @@ protected:
 	void processGoal(const pick_up_action::PickUpGoalConstPtr& goal);
 
 public:
-	/*
-	 * A spinner.
-	 */
-	//ros::AsyncSpinner a_sync_;
 
 	/**
 	 * Constructor.
 	 */
 	PickUpActionServer();
+
+	/**
+	 * Destructor
+	 */
 	virtual ~PickUpActionServer();
 };
 
