@@ -1,4 +1,6 @@
-string signature
+uint8 PUT_DOWN = 0
+uint8 PICK_UP = 1
+uint8 type
 geometry_msgs/PointStamped object_location
 ---
 string result
