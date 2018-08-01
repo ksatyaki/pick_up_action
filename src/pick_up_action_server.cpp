@@ -24,7 +24,9 @@ PickUpActionServer::~PickUpActionServer() {}
 
 void PickUpActionServer::processGoal(
     const pick_up_action::PickUpGoalConstPtr& goal) {
-  if (goal->type != pick_up_action::PickUpGoal::PICK_UP) {
+  jaco_manipulation::PlanAndMoveArmGoal pam_goal;
+  
+  if (goal->type == pick_up_action::PickUpGoal::PICK_UP) {
     ROS_INFO("Picking up object.");
 
     // Prepare the GPG message.
@@ -37,7 +39,6 @@ void PickUpActionServer::processGoal(
       ROS_INFO("Generated Grasp Poses... SUCCESS");
       ROS_INFO("Proceeding to grasp object.");
 
-      jaco_manipulation::PlanAndMoveArmGoal pam_goal;
       pam_goal.goal_type = "open";
 
       bool grasp_success = false;
@@ -91,19 +92,6 @@ void PickUpActionServer::processGoal(
         // ROS_INFO("Grasp success. Retracting arm now.");
       }
 
-      pam_goal.goal_type = "home";
-
-      ROS_INFO("[PickUpActionServer]: Step 5 >>> Moving to Home Pose.");
-      pam_client_.sendGoal(pam_goal);
-      pam_client_.waitForResult();
-
-      if (pam_client_.getState() !=
-          actionlib::SimpleClientGoalState::SUCCEEDED) {
-        ROS_INFO("Sucks. Can't retract arm. We should stop here. Sorry, pal.");
-        server_.setAborted();
-        return;
-      }
-
       ROS_INFO("\'Smooth as a whistle and it don't cost much\'.");
       ROS_INFO("The object is in safe hands! :-)");
       ROS_INFO("DONE.");
@@ -121,56 +109,72 @@ void PickUpActionServer::processGoal(
   }
 
   // Obvious else.
-  ROS_INFO("putting down object.");
+  else {
+    ROS_INFO("putting down object.");
 
-  jaco_manipulation::GenerateGraspPoses gpg_message;
-  gpg_message.request.object_location = goal->object_location;
-  gpg_message.request.object_location.header.stamp = ros::Time::now();
+    jaco_manipulation::GenerateGraspPoses gpg_message;
+    gpg_message.request.object_location = goal->object_location;
+    gpg_message.request.object_location.header.stamp = ros::Time::now();
 
-  if (!gpg_client_.call(gpg_message)) {
-    ROS_INFO("GPG client failed. Contact chitt... if you can find him. ;-)");
-    server_.setAborted();
-    return;
+    if (!gpg_client_.call(gpg_message)) {
+      ROS_INFO("GPG client failed. Contact chitt... if you can find him. ;-)");
+      server_.setAborted();
+      return;
+    }
+
+    ROS_INFO("Proceeding to drop object.");
+    pam_goal.goal_type = "pose";
+    pam_goal.target_pose = gpg_message.response.grasp_poses[0];
+    pam_goal.target_pose.pose.position.z += 0.1;
+
+    pam_client_.sendGoal(pam_goal);
+    ROS_INFO("Sent goal.");
+    pam_client_.waitForResult();
+
+    if (pam_client_.getState() != actionlib::SimpleClientGoalState::SUCCEEDED) {
+      ROS_INFO(
+          "Something failed while trying to move to the pre-putdown pose. ");
+      server_.setAborted();
+      return;
+    }
+
+    pam_goal.target_pose = gpg_message.response.grasp_poses[0];
+
+    pam_client_.sendGoal(pam_goal);
+    ROS_INFO("Sent goal.");
+    pam_client_.waitForResult();
+
+    if (pam_client_.getState() != actionlib::SimpleClientGoalState::SUCCEEDED) {
+      ROS_INFO(
+          "Something failed when moving to put down point. Dropping object "
+          "anyway.");
+    }
+
+    pam_goal.goal_type = "open";
+    pam_client_.sendGoal(pam_goal);
+    ROS_INFO("Sent goal.");
+    pam_client_.waitForResult();
+
+    if (pam_client_.getState() != actionlib::SimpleClientGoalState::SUCCEEDED) {
+      ROS_INFO("Something failed while trying to open gripper.");
+      server_.setAborted();
+      return;
+    }
   }
   
-  ROS_INFO("Proceeding to drop object.");
-  jaco_manipulation::PlanAndMoveArmGoal pam_goal;
-  pam_goal.goal_type = "pose";
-  pam_goal.target_pose = gpg_message.response.grasp_poses[0];
-  pam_goal.target_pose.pose.position.z += 0.1;
+  pam_goal.goal_type = "home";
 
+  ROS_INFO("[PickUpActionServer]: Step 5 >>> Moving to Home Pose.");
   pam_client_.sendGoal(pam_goal);
-  ROS_INFO("Sent goal.");
   pam_client_.waitForResult();
 
-  if(pam_client_.getState() != actionlib::SimpleClientGoalState::SUCCEEDED) {
-    ROS_INFO("Something failed while trying to move to the pre-putdown pose. ");
+  if (pam_client_.getState() != actionlib::SimpleClientGoalState::SUCCEEDED) {
+    ROS_INFO("Sucks. Can't retract arm. We should stop here. Sorry, pal.");
     server_.setAborted();
     return;
   }
 
-  pam_goal.target_pose = gpg_message.response.grasp_poses[0];
-
-  pam_client_.sendGoal(pam_goal);
-  ROS_INFO("Sent goal.");
-  pam_client_.waitForResult();
-
-  if(pam_client_.getState() != actionlib::SimpleClientGoalState::SUCCEEDED) {
-    ROS_INFO("Something failed when moving to put down point. Dropping object anyway.");
-  }
-
-  pam_goal.goal_type = "open";
-  pam_client_.sendGoal(pam_goal);
-  ROS_INFO("Sent goal.");
-  pam_client_.waitForResult();
-
-  if(pam_client_.getState() != actionlib::SimpleClientGoalState::SUCCEEDED) {
-    ROS_INFO("Something failed while trying to open gripper.");
-    server_.setAborted();
-    return;
-  }
-
-  server_.setSucceeded();  
+  server_.setSucceeded();
 }
 }
 
