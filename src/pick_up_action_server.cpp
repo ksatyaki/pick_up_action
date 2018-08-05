@@ -49,9 +49,9 @@ void PickUpActionServer::processGoal(
 
       for (int round = 0; round < gpg_message.response.grasp_poses.size();
            round++) {
-        pam_goal.target_pose = gpg_message.response.pregrasp_poses[round];
+        pam_goal.pose_goal = gpg_message.response.pregrasp_poses[round];
         // ROS_INFO("TARGET POSE IN %s FRAME...",
-        // pam_goal.target_pose.header.frame_id.c_str());
+        // pam_goal.pose_goal.header.frame_id.c_str());
         pam_goal.goal_type = "pose";
         pam_client_.waitForServer();
         ROS_INFO(
@@ -63,7 +63,7 @@ void PickUpActionServer::processGoal(
             actionlib::SimpleClientGoalState::SUCCEEDED) {
           // Pre-grasp has succeeded now proceed for grasp
           pam_goal.goal_type = "pose";
-          pam_goal.target_pose = gpg_message.response.grasp_poses[round];
+          pam_goal.pose_goal = gpg_message.response.grasp_poses[round];
           ROS_INFO("[PickUpActionServer]: Step 3 >>> Moving to grasp pose.");
           pam_client_.sendGoal(pam_goal);
           pam_client_.waitForResult();
@@ -124,8 +124,8 @@ void PickUpActionServer::processGoal(
 
     ROS_INFO("Proceeding to drop object.");
     pam_goal.goal_type = "pose";
-    pam_goal.target_pose = gpg_message.response.grasp_poses[0];
-    pam_goal.target_pose.pose.position.z += 0.1;
+    pam_goal.pose_goal = gpg_message.response.grasp_poses[0];
+    pam_goal.pose_goal.pose.position.z += 0.1;
 
     pam_client_.sendGoal(pam_goal);
     ROS_INFO("Sent goal.");
@@ -138,7 +138,7 @@ void PickUpActionServer::processGoal(
       return;
     }
 
-    pam_goal.target_pose = gpg_message.response.grasp_poses[0];
+    pam_goal.pose_goal = gpg_message.response.grasp_poses[0];
 
     pam_client_.sendGoal(pam_goal);
     ROS_INFO("Sent goal.");
